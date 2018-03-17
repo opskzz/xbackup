@@ -38,6 +38,12 @@ type Xbackup struct {
 	XDoneTime     time.Duration //实例备份的结束时间
 }
 
+//Plugin backup script
+type Plugin struct {
+	FilePath string
+	Cycle    int
+}
+
 // PXConfig parse config file
 func PXConfig(cfg string) *Config {
 	var xConfig Config

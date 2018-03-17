@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-//Download file from redis queue
+//Download file from instance
 func Download(url, filename string) error {
 	resp, err := http.Get(url)
 	if err != nil {

@@ -1,0 +1,22 @@
+uuid: "285"
+gameid: "285"
+
+# 实例提供下载服务
+haddr: "10.10.10.10"
+hport: "4545"
+
+# Redis队列
+qhost: "10.10.10.10"
+qport: "6381"
+qname: "xtrabackup"
+
+# 备份MySQL实例所需信息
+xuser: "root"
+xpass: "xxxx"
+xport: "3306"
+xdirs: "/data/xbackup/mysql"
+
+# 备份Redis实例所需信息
+rhost: "10.10.10.10"
+rport: "6381"
+rdirs: "/data/xbackup/redis"

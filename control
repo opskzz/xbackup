@@ -32,7 +32,7 @@ start() {
 
     if ! [ -f $conf ];then
         echo "Config file $conf doesn't exist, creating one."
-        cp xtrabackup.example.yml $conf
+        cp xbackup.exp.yml $conf
     fi
     nohup ./$app -c $conf &> $logfile &
     sleep 1

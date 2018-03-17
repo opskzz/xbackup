@@ -5,8 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
+	"net"
 	"os"
+	"path"
+	"time"
 
 	"github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql" // user mysql driver
@@ -63,4 +67,55 @@ func Md5Sum(filename string) (string, error) {
 	}
 	checkSum := fmt.Sprintf("%x", hash.Sum(nil))
 	return checkSum, nil
+}
+
+// GetLocalIPAddr get instance ipaddr
+func GetLocalIPAddr() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+	for _, address := range addrs {
+		if ipNet, ok := address.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
+			if ipNet.IP.To4() != nil {
+				return ipNet.IP.String()
+			}
+		}
+	}
+	return ""
+}
+
+//TimeToYmdHms format to 2006-01-02-15-04-05
+func TimeToYmdHms() string {
+	return time.Now().Format("2006-01-02-15-04-05")
+}
+
+// WriteBytes write file
+func WriteBytes(filePath string, wb []byte) (int, error) {
+	os.MkdirAll(path.Dir(filePath), os.ModePerm)
+	fi, err := os.Create(filePath)
+	if err != nil {
+		return 0, err
+	}
+	defer fi.Close()
+	return fi.Write(wb)
+}
+
+// WriteString write file
+func WriteString(filePath, ws string) (int, error) {
+	return WriteBytes(filePath, []byte(ws))
+}
+
+// ReadToByte read file
+func ReadToByte(filePath string) ([]byte, error) {
+	return ioutil.ReadFile(filePath)
+}
+
+// ReadToString read file
+func ReadToString(filePath string) (string, error) {
+	bs, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+	return string(bs), nil
 }

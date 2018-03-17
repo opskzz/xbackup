@@ -1,0 +1,4 @@
+# Redis队列
+qhost: "10.10.10.10"
+qport: "6381"
+qname: "xtrabackup"

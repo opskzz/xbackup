@@ -7,12 +7,9 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/opskzz/gtask/funcs"
-	"github.com/opskzz/gtask/g"
 )
 
-// xtrabackupAll 全备
+// xtrabackupAll all backup
 func xtrabackupAll(user, pass, host, backupDir string, port int) error {
 	var toLsn, completFlag = 0, false
 	args := []string{"--compress", "--no-lock", "--stream=xbstream",
@@ -21,8 +18,8 @@ func xtrabackupAll(user, pass, host, backupDir string, port int) error {
 		fmt.Sprintf("--host=%s", host),
 		fmt.Sprintf("--port=%d", port),
 		fmt.Sprintf("%s", backupDir),
-		fmt.Sprintf("--throttle=%d", g.XtrabackupThrottle),
-		fmt.Sprintf("--compress-threads=%d", g.XtrabackupThreads),
+		fmt.Sprintf("--throttle=%d", XtrabackupThrottle),
+		fmt.Sprintf("--compress-threads=%d", XtrabackupThreads),
 	}
 	cmd := exec.Command("innobackupex", args...)
 	stderr, err := cmd.StderrPipe()
@@ -34,8 +31,8 @@ func xtrabackupAll(user, pass, host, backupDir string, port int) error {
 		return fmt.Errorf("xtrabackup finished error: %v", err)
 	}
 
-	localIP := funcs.GetLocalIPAddr()
-	localTimestamp := funcs.TimeToYmdHms()
+	localIP := GetLocalIPAddr()
+	localTimestamp := TimeToYmdHms()
 	xtrabackupFullFilename := localIP + "_" + localTimestamp + ".xbstream"
 	outputFile, err := os.Create(xtrabackupFullFilename)
 	defer outputFile.Close()
@@ -67,17 +64,17 @@ func xtrabackupAll(user, pass, host, backupDir string, port int) error {
 	}
 	xtrabackupCheckpoints := fmt.Sprintf("to_lsn = %d", toLsn)
 	xtrabackupCheckpointsFilePath := fmt.Sprintf("%s/xtrabackup_checkpoints", backupDir)
-	_, err = funcs.WriteString(xtrabackupCheckpointsFilePath, xtrabackupCheckpoints)
+	_, err = WriteString(xtrabackupCheckpointsFilePath, xtrabackupCheckpoints)
 	if err != nil {
 		return fmt.Errorf("Innobackupex finished but write xtrabackupCheckpoints error: %v", err)
 	}
 	return nil
 }
 
-// xtrabackupInc 增备
+// xtrabackupInc incr backup
 func xtrabackupInc(user, pass, host, backupDir, checkpoints string, port int) error {
 	var toLsn, completFlag = 0, false
-	point, err := funcs.ReadToString(checkpoints)
+	point, err := ReadToString(checkpoints)
 	if err != nil {
 		return fmt.Errorf("Xtrabackup read checkpoints error: %v", err)
 	}
@@ -90,8 +87,8 @@ func xtrabackupInc(user, pass, host, backupDir, checkpoints string, port int) er
 		fmt.Sprintf("%s", backupDir),
 		fmt.Sprintf("--incremental-lsn=%s", fromLsn),
 		fmt.Sprintf("--parallel=%d", 48),
-		fmt.Sprintf("--throttle=%d", g.XtrabackupThrottle),
-		fmt.Sprintf("--compress-threads=%d", g.XtrabackupThreads),
+		fmt.Sprintf("--throttle=%d", XtrabackupThrottle),
+		fmt.Sprintf("--compress-threads=%d", XtrabackupThreads),
 	}
 	cmd := exec.Command("innobackupex", args...)
 	stderr, err := cmd.StderrPipe()
@@ -103,8 +100,8 @@ func xtrabackupInc(user, pass, host, backupDir, checkpoints string, port int) er
 		return fmt.Errorf("xtrabackup incremental finished error: %v", err)
 	}
 
-	localIP := funcs.GetLocalIPAddr()
-	localTimestamp := funcs.TimeToYmdHms()
+	localIP := GetLocalIPAddr()
+	localTimestamp := TimeToYmdHms()
 	xtrabackupIncFilename := localIP + "_" + localTimestamp + ".increase.xbstream"
 	outputFile, err := os.Create(xtrabackupIncFilename)
 	defer outputFile.Close()
@@ -135,7 +132,7 @@ func xtrabackupInc(user, pass, host, backupDir, checkpoints string, port int) er
 	}
 	xtrabackupCheckpoints := fmt.Sprintf("to_lsn = %d", toLsn)
 	xtrabackupCheckpointsFilePath := fmt.Sprintf("%s/xtrabackup_checkpoints", backupDir)
-	_, err = funcs.WriteString(xtrabackupCheckpointsFilePath, xtrabackupCheckpoints)
+	_, err = WriteString(xtrabackupCheckpointsFilePath, xtrabackupCheckpoints)
 	if err != nil {
 		return fmt.Errorf("Innobackupex incremental finished but write xtrabackupCheckpoints error: %v", err)
 	}

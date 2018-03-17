@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"./g"
 )
 
 func main() {
@@ -12,19 +14,20 @@ func main() {
 	flag.Parse()
 
 	if *ver {
-		fmt.Println("mbackup v1.0")
+		fmt.Println(g.Version)
 		os.Exit(0)
 	}
-
-	config := PXConfig(*cfg)
-
+	config := g.PXConfig(*cfg)
 	//init backup dir
-	initBackupDir(config.XDirs)
+	g.InitBackupDir(config.XDirs)
 	//check mysql online
-	initMySQLAlive(config.XUser, config.XPass, config.QPort, config.QHost)
+	g.InitMySQLAlive(config.XUser, config.XPass, config.QPort, config.QHost)
 	//check redis online
-	initQueueAlive(config.QHost, config.QPort)
+	g.InitQueueAlive(config.QHost, config.QPort)
 
-	go httpRsync(config.HAddr, config.HPort, config.XDirs)
+	//backup progress on
+	go g.DoBackup(config.QHost, config.QPort, config.QName)
+	//init http rsync
+	go g.HTTPRsync(config.HAddr, config.HPort, config.XDirs)
 	select {}
 }
